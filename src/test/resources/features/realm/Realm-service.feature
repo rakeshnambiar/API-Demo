@@ -10,12 +10,12 @@ Feature:  To verify the Realm - API functionalities
     And Requested name, description should available in the response
 
     Examples:
-      | name   | description          |
-      | RAKE   | String Testing       |
-      | RAK123 | Alphanumeric Testing |
-      | 123456 | Number Testing       |
-      | 123RAK |                      |
-      | $/#%@+ | Special Characters   |
+      | name     | description          |
+      | RAKE     | String Testing       |
+      | RAKE123  | Alphanumeric Testing |
+      | 1234567  | Number Testing       |
+      | 123RAKE  |                      |
+      | $/#%@+%  | Special Characters   |
 
 
   @TC02_RealmAPITest   @NoBrowser
@@ -45,9 +45,6 @@ Feature:  To verify the Realm - API functionalities
       | ABH999 | Alphanumeric Testing |
       | 999456 | Number Testing       |
       | AB99BH |                      |
-
-
-
 
     #Not scripted the GET Test case with id Not an integer
 
