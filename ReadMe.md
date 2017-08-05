@@ -4,7 +4,7 @@ Author : Rakesh Choorikkadu
 **********************************************************************************************************************************************************************************************************************************************
 
 Custom Feature : 
-	1. Used sure-fire plugin to run the Test cases in paralle
+	1. Used sure-fire plugin to run the Test cases in parallel
 	2. Included Java log to print the output messages and service service which elimintae systerm.out practice
 	3. Capable to view both Serenity Report and Cucumber JVM Report
 	4. Lots of Helpers are included in the Framework to fast track the scripting and avoid duplication
@@ -16,7 +16,7 @@ Custom Feature :
 Commands :
 
 1. To run the Sanity Test cases
-	clean install -P domain-test -Dwebdriver.driver=chrome -Dwebdriver.base.url=https://yoururl.com/ -Dtest.tagnames=SanityTest -Dmaven.test.skip=false -Dtest.threadcount=1
+	mvn clean install -P domain-test -Dmaven.test.skip=false -Dwebdriver.base.url=yoururl -Dtest.tagnames=Sanity
 2. To generate the JAX-WS class run time
 	clean install generate-sources -Ppackage-test [Use this command in Jenkins]
 	

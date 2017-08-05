@@ -1,42 +1,28 @@
 package net.thucydides.ebi.cucumber.pages.webservices;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 
 
-import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
-import net.thucydides.core.reports.html.ResultRankingFormatter;
-import net.thucydides.core.reports.json.JSONConverter;
-import net.thucydides.ebi.cucumber.framework.beans.realm.ObjectFactory;
 import net.thucydides.ebi.cucumber.framework.beans.realm.Realm;
 
-import net.thucydides.ebi.cucumber.framework.context.RealmServiceContext;
+import net.thucydides.ebi.cucumber.framework.context.RealmGetServiceContext;
+import net.thucydides.ebi.cucumber.framework.context.RealmPostServiceContext;
 import net.thucydides.ebi.cucumber.framework.helpers.RestServiceHelper;
 import net.thucydides.ebi.cucumber.framework.hooks.ScenarioHook;
-import net.thucydides.ebi.cucumber.steps.RealmServiceSteps;
 import org.json.JSONObject;
 import org.json.XML;
-import org.junit.Test;
-
-import java.io.IOException;
-
-
-import static io.restassured.http.ContentType.JSON;
-import static net.thucydides.ebi.cucumber.framework.context.RealmServiceContext.realm;
 
 /**
  * Created by rakeshnambiar on 03/08/2017.
  */
 public class realmServiceImpl {
     private static String idValue = null;
+    private static String response = null;
 
-    public void postRealm(String name, String description) throws Exception {
+    public void postRealm(String name, String description, String format) throws Exception {
         try{
             String xmlRequest = null;
-            if(name.length() > 0) {
+            if(name !=null) {
                 xmlRequest = "<realm name=\"var_name\"> \n" +
                         "   <description>var_Description</description> \n" +
                         "</realm>";
@@ -47,16 +33,17 @@ public class realmServiceImpl {
             xmlRequest = xmlRequest.replace("var_Description", description);
             ScenarioHook.getScenario().write("--------------- Request XML ---------------");
             ScenarioHook.getScenario().write(xmlRequest);
-            String response = RestServiceHelper.postRequest(xmlRequest);
-            if(RestServiceHelper.responseCode != 400 & RestServiceHelper.responseCode != 404) {
+            response = RestServiceHelper.postRequest(xmlRequest, format);
+
+            if(RestServiceHelper.responseCode == 201) {
                 Realm realmResp = new Realm();
                 ObjectMapper objectMapper = new ObjectMapper();
                 JSONObject xmlJSONObj = XML.toJSONObject(response);
                 String jsonStr = xmlJSONObj.get("realm").toString();
                 realmResp = objectMapper.readValue(jsonStr, Realm.class);
-                RealmServiceContext.realm = realmResp;
+                RealmPostServiceContext.realm = realmResp;
+                idValue = RealmPostServiceContext.realm.getId().toString();
             }
-
         }catch (Exception e){
             throw new Exception("ERROR: POST operation failed");
         }
@@ -64,7 +51,15 @@ public class realmServiceImpl {
 
     public void getRealm() throws Exception {
         try{
-
+            String realmDetails = RestServiceHelper.getRequest(idValue);
+            if(RestServiceHelper.responseCode !=400){
+                Realm realmResp = new Realm();
+                ObjectMapper objectMapper = new ObjectMapper();
+                JSONObject xmlJSONObj = XML.toJSONObject(realmDetails);
+                String jsonStr = xmlJSONObj.get("realm").toString();
+                realmResp = objectMapper.readValue(jsonStr, Realm.class);
+                RealmGetServiceContext.realm = realmResp;
+            }
         }catch (Exception e){
             throw new Exception("ERROR: GET operation failed");
         }
@@ -72,39 +67,51 @@ public class realmServiceImpl {
 
     public void clearReAlm() throws Exception {
         try{
-            RestServiceHelper.deleteRequest(idValue);
+            if(idValue != null) {
+                RestServiceHelper.deleteRequest(idValue);
+            }
         }catch (Exception e){
             throw new Exception("ERROR: While Deleting the Realm");
         }
     }
 
-    public boolean verifyIdKey() throws Exception {
+    public boolean verifyIdKey(String operation) throws Exception {
         try{
-            idValue = RealmServiceContext.realm.getId().toString();
-            String key = RealmServiceContext.realm.getKey().toString();
+            String key = null;
+            if(operation.equalsIgnoreCase("POST")){
+                key = RealmPostServiceContext.realm.getKey();
+            } else {
+                idValue = RealmGetServiceContext.realm.getId().toString();
+                key = RealmGetServiceContext.realm.getKey();
+            }
             ScenarioHook.getScenario().write("id - " + idValue);
             ScenarioHook.getScenario().write("key - " + key);
-            if(idValue.length() > 0 & key.length() >0 ){
-                return true;
-            } else {
-                return false;
-            }
+            return idValue.length() > 0 & key.length() > 0;
         }catch (Exception e){
             throw new Exception("ERROR: While verifying the Id and Key");
         }
     }
 
-    public boolean verifyNameDesc(String name, String desc) throws Exception {
+    public boolean verifyNameDesc(String operation, String name, String desc) throws Exception {
         boolean match = false;
         try{
-            if(RealmServiceContext.realm.getName().equalsIgnoreCase(name)){
-                if(RealmServiceContext.realm.getDescription().equalsIgnoreCase(desc)){
+            String respName = "";
+            String respDesc = "";
+            if(operation.equalsIgnoreCase("POST")){
+                respName = RealmPostServiceContext.realm.getName();
+                respDesc = RealmPostServiceContext.realm.getDescription();
+            } else {
+                respName = RealmGetServiceContext.realm.getName();
+                respDesc = RealmGetServiceContext.realm.getDescription();
+            }
+            if(respName.equalsIgnoreCase(name)){
+                if(respDesc.equalsIgnoreCase(desc)){
                     match = true;
                 } else {
-                    ScenarioHook.getScenario().write("Description NOT proper - " + RealmServiceContext.realm.getDescription());
+                    ScenarioHook.getScenario().write("Description NOT proper - " + RealmPostServiceContext.realm.getDescription());
                 }
             } else {
-                ScenarioHook.getScenario().write("Name NOT proper - " + RealmServiceContext.realm.getName());
+                ScenarioHook.getScenario().write("Name NOT proper - " + RealmPostServiceContext.realm.getName());
             }
         }catch (Exception e){
             throw new Exception("ERROR: While verifying the Name and Description");
@@ -112,4 +119,11 @@ public class realmServiceImpl {
         return match;
     }
 
+    public boolean verifyErrorResponse(){
+        try{
+            return response.contains("Duplicate realm name");
+        }catch (Exception e){
+            return false;
+        }
+    }
 }
