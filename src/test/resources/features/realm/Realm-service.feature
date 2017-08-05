@@ -10,16 +10,16 @@ Feature:  To verify the Realm - API functionalities
     And Requested name, description should available in the response
 
     Examples:
-      | name   | description           |
-      | RAKE    | String Testing        |
-      | RAK123 | Alphanumeric Testing  |
-      | 123456 | Number Testing        |
-      | 123RAK |                       |
-      | $/#%@+ | Special Characters    |
+      | name   | description          |
+      | RAKE   | String Testing       |
+      | RAK123 | Alphanumeric Testing |
+      | 123456 | Number Testing       |
+      | 123RAK |                      |
+      | $/#%@+ | Special Characters   |
 
 
   @TC02_RealmAPITest   @NoBrowser
-    Scenario: To verify the duplicate Posting of a Realm
+  Scenario: To verify the duplicate Posting of a Realm
     Given I have Realm Service URL
     When I post the XML request with "DUPL01", "Duplicate Testing"
     Then Service should returns the success code 201
@@ -40,11 +40,11 @@ Feature:  To verify the Realm - API functionalities
     Then GET Response should contain the mandatory tag values id, key
     And Requested name, description should available in the GET response
     Examples:
-      | name   | description           |
-      | ABH    | String Testing        |
-      | ABH999 | Alphanumeric Testing  |
-      | 999456 | Number Testing        |
-      | AB99BH |                       |
+      | name   | description          |
+      | ABH    | String Testing       |
+      | ABH999 | Alphanumeric Testing |
+      | 999456 | Number Testing       |
+      | AB99BH |                      |
 
 
 
